@@ -1,4 +1,97 @@
-#map {
-    height: 400px;
-    width: 100%;
+.map-container {
+  display: flex;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+
+
+.map-wrapper {
+  flex: 1 1 400px;
+  display: flex;
+  flex-direction: column;
+}
+
+#map1, #map2 {
+  height: 360px;
+  width: 100%;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+}
+
+.map-title {
+  font-weight: bold;
+  font-size: 18px;
+  margin-bottom: 6px;
+  text-align: center;
+}
+
+.filters-container {
+  margin-top: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.filters-container input {
+  margin-left: 5px;
+}
+
+.filters-container button {
+  margin-top: 6px;
+  padding: 6px;
+  border-radius: 5px;
+  border: none;
+  background-color: #2196f3;
+  color: white;
+  cursor: pointer;
+}
+
+.filters-container button:hover {
+  background-color: #1976d2;
+}
+
+@media (max-width: 800px) {
+  .map-container {
+    flex-direction: column;
+  }
+}
+
+.leaflet-popup-content-wrapper {
+ padding: 0;   
+}
+.leaflet-popup-content {
+    margin: 0;
+}
+.quake-popup {
+  font-family: Arial, sans-serif;
+  line-height: 1.4;
+  padding: 5px;
+  border-radius: 12px;
+}
+
+.quake-title {
+  margin: 0 0 8px 0;
+  font-size: 16px;
+  text-align: center;
+}
+
+.quake-popup p {
+  margin: 4px 0;
+  font-size: 13px;
+}
+
+.fav-btn {
+  margin-top: 10px;
+  width: 100%;
+  padding: 6px;
+  border: none;
+  border-radius: 6px;
+  background-color: #ff9800;
+  color: white;
+  cursor: pointer;
+  font-size: 13px;
+}
+
+.fav-btn:hover {
+  background-color: #e68900;
 }

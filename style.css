@@ -81,6 +81,7 @@
 }
 
 .fav-btn {
+display: none;
   margin-top: 10px;
   width: 100%;
   padding: 6px;
@@ -90,6 +91,10 @@
   color: white;
   cursor: pointer;
   font-size: 13px;
+}
+
+.fav-btn.show {
+    display: block;
 }
 
 .fav-btn:hover {

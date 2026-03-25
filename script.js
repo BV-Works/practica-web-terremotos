@@ -1,3 +1,10 @@
+// VARIABLES Y CONSTANTES
+const today = new Date().toISOString().split("T")[0];
+
+document.getElementById("startDate").max = today;
+document.getElementById("endDate").max = today;
+document.getElementById("endDate").value = today;
+
 let map1 = L.map("map1", {
   maxBounds: [
     [-90, -190],
@@ -36,10 +43,17 @@ let Esri_NatGeoWorldMap2 = L.tileLayer(
   },
 ).addTo(map2);
 
+// EVENTOS
+
+document.getElementById("filtrarBtn").addEventListener("click", (e) => {
+  e.preventDefault();
+  actualizarMapaFiltrado();
+});
+
 map1.scrollWheelZoom.disable();
 map2.scrollWheelZoom.disable();
 // Habilitar solo si se mantiene Ctrl
-map1.on('wheel', function(e) {
+map1.on("wheel", function (e) {
   if (e.originalEvent.ctrlKey) {
     map1.scrollWheelZoom.enable();
   } else {
@@ -47,7 +61,7 @@ map1.on('wheel', function(e) {
   }
 });
 
-map2.on('wheel', function(e) {
+map2.on("wheel", function (e) {
   if (e.originalEvent.ctrlKey) {
     map2.scrollWheelZoom.enable();
   } else {
@@ -55,6 +69,7 @@ map2.on('wheel', function(e) {
   }
 });
 
+// FUNCIONES
 
 async function obtenerTerremotos() {
   const url =
@@ -87,27 +102,111 @@ async function obtenerTerremotos() {
   }
 }
 
-(async () => {
-  const terremotos = await obtenerTerremotos();
+async function obtenerTerremotosFiltrados(minMag, startDate, endDate) {
+  const url = `https://earthquake.usgs.gov/fdsnws/event/1/query?format=geojson&starttime=${startDate}&endtime=${endDate}&minmagnitude=${minMag}`;
 
-  terremotos.map((terremoto) => {
-    const coordenadas_terremoto = [
-      terremoto.coordenadas.lat,
-      terremoto.coordenadas.lon,
-    ];
+  try {
+    const response = await fetch(url);
+    if (!response.ok) {
+      throw new Error("Error en la petición filtrada");
+    }
 
-    const color = getColor(terremoto.magnitud);
-    const marker = L.circleMarker(coordenadas_terremoto, {
-      radius: 3 + terremoto.magnitud,
+    const data = await response.json();
+
+    return data.features.map((eq) => ({
+      id: eq.id,
+      nombre: eq.properties.title,
+      magnitud: eq.properties.mag,
+      lugar: eq.properties.place,
+      fecha: new Date(eq.properties.time),
+      coordenadas: {
+        lat: eq.geometry.coordinates[1],
+        lon: eq.geometry.coordinates[0],
+        profundidad: eq.geometry.coordinates[2],
+      },
+      url: eq.properties.url,
+    }));
+  } catch (error) {
+    console.error("Error obteniendo terremotos filtrados:", error);
+    return [];
+  }
+}
+
+async function actualizarMapaFiltrado() {
+  const minMag = document.getElementById("minMag").value;
+  const startDate = document.getElementById("startDate").value;
+  const endDate = document.getElementById("endDate").value;
+
+  // 🔒 validar antes de llamar a la API
+  if (!validarFiltros(minMag, startDate, endDate)) return;
+  // 🧹 limpiar mapa antes de pintar nuevos datos
+  limpiarMapa(map2);
+
+  const terremotos = await obtenerTerremotosFiltrados(
+    minMag,
+    startDate,
+    endDate,
+  );
+
+  terremotos.forEach((terremoto) => {
+    crearMarker(map2, terremoto, false);
+  });
+}
+
+function validarFiltros(minMag, startDate, endDate) {
+  const hoy = new Date();
+
+  if (minMag < 1 || minMag > 7) {
+    alert("La magnitud debe estar entre 1 y 7");
+    return false;
+  }
+
+  const fechaInicio = new Date(startDate);
+  const fechaFin = new Date(endDate);
+  const fechaMin = new Date("2024-01-01");
+
+  if (fechaInicio < fechaMin || fechaFin < fechaMin) {
+    alert("Las fechas deben ser posteriores a 01/01/2024");
+    return false;
+  }
+
+  if (fechaInicio > hoy || fechaFin > hoy) {
+    alert("Las fechas no pueden ser futuras");
+    return false;
+  }
+
+  if (fechaInicio > fechaFin) {
+    alert("La fecha de inicio no puede ser mayor que la de fin");
+    return false;
+  }
+
+  return true;
+}
+
+function limpiarMapa(map) {
+  map.eachLayer((layer) => {
+    if (!(layer instanceof L.TileLayer)) {
+      map.removeLayer(layer);
+    }
+  });
+}
+
+function crearMarker(map, terremoto, isFav = false) {
+  const color = getColor(terremoto.magnitud);
+  const marker = L.circleMarker(
+    [terremoto.coordenadas.lat, terremoto.coordenadas.lon],
+    {
+      radius: 6 + terremoto.magnitud,
       fillColor: color,
       color: "#000",
       weight: 1,
       opacity: 1,
       fillOpacity: 0.8,
-    })
-      .bindPopup(crearPopup(terremoto, color))
-      .addTo(map1);
-
+    },
+  )
+    .bindPopup(crearPopup(terremoto, color, isFav))
+    .addTo(map);
+  if (isFav) {
     marker.on("popupopen", (e) => {
       const favButton = e.popup._contentNode.querySelector(".fav-btn");
       if (favButton) {
@@ -116,9 +215,8 @@ async function obtenerTerremotos() {
         });
       }
     });
-  });
-  console.log(terremotos);
-})();
+  }
+}
 
 function getColor(mag) {
   if (mag < 1) return "#9e9e9e";
@@ -131,7 +229,9 @@ function getColor(mag) {
   return "#e91e63";
 }
 
-function crearPopup(terremoto, color) {
+function crearPopup(terremoto, color, isFav = false) {
+  const favButtonShow = isFav ? "show" : "";
+
   return `
     <div class="quake-popup" style="background:${color}">
       <h3 class="quake-title">🌍 Terremoto</h3>
@@ -142,7 +242,21 @@ function crearPopup(terremoto, color) {
       <p><strong>Código:</strong> ${terremoto.id}</p>
       <p><strong>Magnitud:</strong> ${terremoto.magnitud}</p>
 
-      <button class="fav-btn">⭐ Añadir a favoritos</button>
+      <button class="fav-btn ${favButtonShow}">⭐ Añadir a favoritos</button>
     </div>
   `;
 }
+
+(async () => {
+  const terremotos = await obtenerTerremotos();
+
+  terremotos.forEach((terremoto) => {
+    const coordenadas_terremoto = [
+      terremoto.coordenadas.lat,
+      terremoto.coordenadas.lon,
+    ];
+    crearMarker(map1, terremoto, true);
+    crearMarker(map2, terremoto, false);
+  });
+  console.log(terremotos);
+})();

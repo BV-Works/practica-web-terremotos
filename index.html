@@ -21,7 +21,6 @@
 
   <body>
     <div class="map-container">
-      <!-- Mapa original / favoritos -->
       <div class="map-wrapper">
         <p class="map-title">Mapa Favoritos</p>
         <div id="map1"></div>
@@ -34,19 +33,33 @@
         <div class="filters-container">
           <label>
             Magnitud mínima:
-            <input type="number" id="minMag" step="1" value="0" />
+            <input
+              type="number"
+              id="minMag"
+              step="1"
+              min="1"
+              max="7"
+              value="1"
+              required
+            />
           </label>
 
           <label>
             Fecha inicio:
-            <input type="date" id="startDate" value="2014-01-01" />
+            <input
+              type="date"
+              id="startDate"
+              min="2024-01-01"
+              max=""
+              value="2024-01-01"
+              required
+            />
           </label>
 
           <label>
             Fecha fin:
-            <input type="date" id="endDate" value="2014-01-02" />
+            <input type="date" id="endDate" min="2024-01-01" max="" required />
           </label>
-
           <button id="filtrarBtn">Filtrar terremotos</button>
         </div>
       </div>

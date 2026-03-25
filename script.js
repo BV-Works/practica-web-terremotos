@@ -43,6 +43,10 @@ let Esri_NatGeoWorldMap2 = L.tileLayer(
   },
 ).addTo(map2);
 
+let terremotosGlobal = [];
+let terremotosFiltrados = [];
+let favoritos = [];
+
 // EVENTOS
 
 document.getElementById("filtrarBtn").addEventListener("click", (e) => {
@@ -132,25 +136,44 @@ async function obtenerTerremotosFiltrados(minMag, startDate, endDate) {
   }
 }
 
+function pintarMapaFavs() {
+  limpiarMapa(map1);
+
+  terremotosGlobal.forEach((terremoto) => {
+    crearMarker(map1, terremoto, true);
+  });
+}
+
+function pintarMapaFiltroInit() {
+  limpiarMapa(map2);
+
+  terremotosGlobal.forEach((terremoto) => {
+    crearMarker(map2, terremoto, false);
+  });
+}
+
+function pintarMapaFiltrado() {
+  terremotosFiltrados.forEach((terremoto) => {
+    crearMarker(map2, terremoto, false);
+  });
+}
+
 async function actualizarMapaFiltrado() {
-  const minMag = document.getElementById("minMag").value;
+  const minMag = parseFloat(document.getElementById("minMag").value);
   const startDate = document.getElementById("startDate").value;
   const endDate = document.getElementById("endDate").value;
 
-  // 🔒 validar antes de llamar a la API
   if (!validarFiltros(minMag, startDate, endDate)) return;
-  // 🧹 limpiar mapa antes de pintar nuevos datos
+
   limpiarMapa(map2);
 
-  const terremotos = await obtenerTerremotosFiltrados(
+  terremotosFiltrados = await obtenerTerremotosFiltrados(
     minMag,
     startDate,
-    endDate,
+    endDate
   );
 
-  terremotos.forEach((terremoto) => {
-    crearMarker(map2, terremoto, false);
-  });
+  pintarMapaFiltrado();
 }
 
 function validarFiltros(minMag, startDate, endDate) {
@@ -211,6 +234,7 @@ function crearMarker(map, terremoto, isFav = false) {
       const favButton = e.popup._contentNode.querySelector(".fav-btn");
       if (favButton) {
         favButton.addEventListener("click", () => {
+          favoritos.push(terremoto);
           alert("favorito guardado:" + terremoto.nombre);
         });
       }
@@ -248,15 +272,8 @@ function crearPopup(terremoto, color, isFav = false) {
 }
 
 (async () => {
-  const terremotos = await obtenerTerremotos();
-
-  terremotos.forEach((terremoto) => {
-    const coordenadas_terremoto = [
-      terremoto.coordenadas.lat,
-      terremoto.coordenadas.lon,
-    ];
-    crearMarker(map1, terremoto, true);
-    crearMarker(map2, terremoto, false);
-  });
+  terremotosGlobal = await obtenerTerremotos();
+  pintarMapaFavs();
+  pintarMapaFiltroInit();
   console.log(terremotos);
 })();

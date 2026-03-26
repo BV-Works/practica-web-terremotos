@@ -1,6 +1,20 @@
 body {
   font-size: 1.3rem;
 }
+
+button {
+  border-radius: 6px;
+  border: none;
+  background-color: #2196f3;
+  color: white;
+  cursor: pointer;
+  height: 40px;
+}
+
+button:hover {
+  background-color: #1976d2;
+}
+
 .auth-container {
   margin-bottom: 20px;
 
@@ -32,15 +46,6 @@ body {
 .auth-box button {
   width: 100%;
   padding: 8px;
-  border: none;
-  border-radius: 6px;
-  background-color: #2196f3;
-  color: white;
-  cursor: pointer;
-}
-
-.auth-box button:hover {
-  background-color: #1976d2;
 }
 
 .auth-toggle {
@@ -147,6 +152,18 @@ body {
   text-align: center;
 }
 
+.buttons-container {
+  margin-top: 30px;
+  display: flex;
+  flex-direction: row;
+  gap: 8px;
+}
+
+.buttons-container button{
+  width: 50%;
+}
+
+
 .filters-container {
   margin-top: 10px;
   display: flex;
@@ -161,16 +178,6 @@ body {
 .filters-container button {
   margin-top: 6px;
   padding: 6px;
-  border-radius: 5px;
-  border: none;
-  background-color: #2196f3;
-  color: white;
-  cursor: pointer;
-  height: 40px;
-}
-
-.filters-container button:hover {
-  background-color: #1976d2;
 }
 
 @media (max-width: 800px) {
@@ -206,12 +213,13 @@ body {
 .fav-btn {
 display: none;
   margin-top: 10px;
+  margin-bottom: 6px;
   width: 100%;
   padding: 6px;
   border: none;
   border-radius: 6px;
-  background-color: #ff9800;
-  color: white;
+  background-color: white;
+  color: black;
   cursor: pointer;
   font-size: 13px;
 }

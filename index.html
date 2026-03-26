@@ -49,13 +49,17 @@
       <div class="map-wrapper">
         <p class="map-title">Mapa Favoritos</p>
         <div id="map1"></div>
+        <section class="buttons-container hidden"  id="mapButtons">
+          <button id="showFavorites">Mostrar Favoritos</button>
+          <button id="showAll">Mostrar Todos</button>
+        </section>
       </div>
 
       <div class="map-wrapper">
         <p class="map-title">Mapa Filtrado</p>
         <div id="map2"></div>
-        <div class="filters-container">
-                  <div id="errorMsg" style="color:red; margin-top:10px;"></div>
+        <section class="filters-container">
+          <div id="errorMsg" style="color: red; margin-top: 10px"></div>
 
           <label>
             Magnitud mínima:
@@ -87,7 +91,7 @@
             <input type="date" id="endDate" min="2024-01-01" max="" required />
           </label>
           <button id="filtrarBtn">Filtrar terremotos</button>
-        </div>
+        </section>
       </div>
     </section>
     <script src="https://www.gstatic.com/firebasejs/8.7.1/firebase-app.js"></script>

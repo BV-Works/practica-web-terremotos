@@ -32,6 +32,7 @@ const authEmail = document.getElementById("authEmail");
 const authPassword = document.getElementById("authPassword");
 const welcomeMessage = document.getElementById("welcomeMessage");
 const logoutBtn = document.getElementById("logoutBtn");
+const mapButtons = document.getElementById("mapButtons");
 
 let map1 = L.map("map1", {
   maxBounds: [
@@ -104,7 +105,9 @@ authForm.addEventListener("submit", async (e) => {
 
     if (isLogin) {
       userLogged = await firebase.auth().signInWithEmailAndPassword(email, password);
+      pintarMapaFavs(true);
     } else {
+      pintarMapaFavs(true);
       userLogged = await firebase.auth().createUserWithEmailAndPassword(email, password);
     }
 
@@ -115,7 +118,7 @@ authForm.addEventListener("submit", async (e) => {
     welcomeMessage.classList.remove("hidden");
     logoutBtn.classList.remove("hidden");
     welcomeMessage.textContent = `Bienvenido ${userLogged.user.email}`;
-
+    mapButtons.classList.remove("hidden");
   } catch (error) {
     alert(error.message);
   }
@@ -132,9 +135,10 @@ logoutBtn.addEventListener("click", async () => {
     authToggle.classList.remove("hidden");
     welcomeMessage.classList.add("hidden");
     logoutBtn.classList.add("hidden");
+    mapButtons.classList.add("hidden");
 
     if (!isLogin) changeForm();
-
+    pintarMapaFavs();
   } catch (error) {
     alert("Error cerrando sesión: " + error.message);
   }
@@ -247,11 +251,11 @@ async function obtenerTerremotosFiltrados(minMag, startDate, endDate) {
   }
 }
 
-function pintarMapaFavs() {
+function pintarMapaFavs(isLoggedIn = false) {
   limpiarMapa(map1);
 
   terremotosGlobal.forEach((terremoto) => {
-    crearMarker(map1, terremoto, true);
+    crearMarker(map1, terremoto, true, isLoggedIn);
   });
 }
 
@@ -325,7 +329,7 @@ function limpiarMapa(map) {
   });
 }
 
-function crearMarker(map, terremoto, isFav = false) {
+function crearMarker(map, terremoto, isFav = false, isLoggedIn = false) {
   const color = getColor(terremoto.magnitud);
   const marker = L.circleMarker(
     [terremoto.coordenadas.lat, terremoto.coordenadas.lon],
@@ -338,9 +342,9 @@ function crearMarker(map, terremoto, isFav = false) {
       fillOpacity: 0.8,
     },
   )
-    .bindPopup(crearPopup(terremoto, color, isFav))
+    .bindPopup(crearPopup(terremoto, color, isFav, isLoggedIn))
     .addTo(map);
-  if (isFav) {
+  if (isFav && isLoggedIn) {
     marker.on("popupopen", (e) => {
       const favButton = e.popup._contentNode.querySelector(".fav-btn");
       if (favButton) {
@@ -364,8 +368,8 @@ function getColor(mag) {
   return "#e91e63";
 }
 
-function crearPopup(terremoto, color, isFav = false) {
-  const favButtonShow = isFav ? "show" : "";
+function crearPopup(terremoto, color, isFav = false, isLoggedIn = false) {
+  const favButtonShow = isFav && isLoggedIn ? "show" : "";
 
   return `
     <div class="quake-popup" style="background:${color}">

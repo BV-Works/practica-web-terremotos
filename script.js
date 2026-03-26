@@ -1,9 +1,37 @@
+// FIREBASE
+
+const firebaseConfig = {
+  apiKey: "AIzaSyDBNBCyEOhDM32ydcr0Irq9TrzcDrX4Xw8",
+  authDomain: "app-terremotos.firebaseapp.com",
+  projectId: "app-terremotos",
+  storageBucket: "app-terremotos.firebasestorage.app",
+  messagingSenderId: "855782016333",
+  appId: "1:855782016333:web:ab349cdd464f3050c2e304",
+};
+firebase.initializeApp(firebaseConfig); // Inicializaar app Firebase
+
+const db = firebase.firestore(); // db representa mi BBDD //inicia Firestore
+
 // VARIABLES Y CONSTANTES
+const errorDiv = document.getElementById("errorMsg");
 const today = new Date().toISOString().split("T")[0];
 
 document.getElementById("startDate").max = today;
 document.getElementById("endDate").max = today;
 document.getElementById("endDate").value = today;
+
+
+
+let isLogin = true;
+
+const authTitle = document.getElementById("authTitle");
+const authButton = document.getElementById("authButton");
+const authToggle = document.getElementById("authToggle");
+const authForm = document.getElementById("authForm");
+const authEmail = document.getElementById("authEmail");
+const authPassword = document.getElementById("authPassword");
+const welcomeMessage = document.getElementById("welcomeMessage");
+const logoutBtn = document.getElementById("logoutBtn");
 
 let map1 = L.map("map1", {
   maxBounds: [
@@ -49,6 +77,69 @@ let favoritos = [];
 
 // EVENTOS
 
+authToggle.addEventListener("click", () => {
+  changeForm();
+});
+
+authForm.addEventListener("submit", async (e) => {
+  e.preventDefault();
+
+  const email = authEmail.value.trim();
+  const password = authPassword.value;
+
+  // Validación básica email
+  if (!email || !/\S+@\S+\.\S+/.test(email)) {
+    alert("Introduce un email válido");
+    return;
+  }
+
+  // Validación mínima de password
+  if (!password || password.length < 6) {
+    alert("La contraseña debe tener al menos 6 caracteres");
+    return;
+  }
+
+  try {
+    let userLogged;
+
+    if (isLogin) {
+      userLogged = await firebase.auth().signInWithEmailAndPassword(email, password);
+    } else {
+      userLogged = await firebase.auth().createUserWithEmailAndPassword(email, password);
+    }
+
+    authTitle.classList.add("hidden")
+    authForm.classList.add("hidden");
+    authToggle.classList.add("hidden");
+
+    welcomeMessage.classList.remove("hidden");
+    logoutBtn.classList.remove("hidden");
+    welcomeMessage.textContent = `Bienvenido ${userLogged.user.email}`;
+
+  } catch (error) {
+    alert(error.message);
+  }
+});
+
+
+logoutBtn.addEventListener("click", async () => {
+  try {
+    await firebase.auth().signOut();
+
+    authForm.reset();
+    authTitle.classList.remove("hidden")
+    authForm.classList.remove("hidden");
+    authToggle.classList.remove("hidden");
+    welcomeMessage.classList.add("hidden");
+    logoutBtn.classList.add("hidden");
+
+    if (!isLogin) changeForm();
+
+  } catch (error) {
+    alert("Error cerrando sesión: " + error.message);
+  }
+});
+
 document.getElementById("filtrarBtn").addEventListener("click", (e) => {
   e.preventDefault();
   actualizarMapaFiltrado();
@@ -74,6 +165,20 @@ map2.on("wheel", function (e) {
 });
 
 // FUNCIONES
+
+function changeForm() {
+  isLogin = !isLogin;
+
+  if (isLogin) {
+    authTitle.textContent = "Login";
+    authButton.textContent = "Entrar";
+    authToggle.textContent = "¿No estás registrado?";
+  } else {
+    authTitle.textContent = "Sign Up";
+    authButton.textContent = "Registrarse";
+    authToggle.textContent = "¿Ya tienes cuenta?";
+  }
+}
 
 async function obtenerTerremotos() {
   const url =
@@ -108,7 +213,7 @@ async function obtenerTerremotos() {
 
 async function obtenerTerremotosFiltrados(minMag, startDate, endDate) {
   const url = `https://earthquake.usgs.gov/fdsnws/event/1/query?format=geojson&starttime=${startDate}&endtime=${endDate}&minmagnitude=${minMag}`;
-
+  errorDiv.textContent = '';
   try {
     const response = await fetch(url);
     if (!response.ok) {
@@ -132,6 +237,12 @@ async function obtenerTerremotosFiltrados(minMag, startDate, endDate) {
     }));
   } catch (error) {
     console.error("Error obteniendo terremotos filtrados:", error);
+    // Mostrar en pantalla
+    if (errorDiv) {
+      errorDiv.textContent = "Error al obtener datos: " + error.message;
+    } else {
+      alert("Error al obtener datos: " + error.message);
+    }
     return [];
   }
 }
@@ -275,5 +386,5 @@ function crearPopup(terremoto, color, isFav = false) {
   terremotosGlobal = await obtenerTerremotos();
   pintarMapaFavs();
   pintarMapaFiltroInit();
-  console.log(terremotos);
+  console.log(terremotosGlobal);
 })();

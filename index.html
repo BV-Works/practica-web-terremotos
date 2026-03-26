@@ -20,7 +20,32 @@
   </head>
 
   <body>
-    <div class="map-container">
+    <section class="auth-container">
+      <div class="auth-box">
+        <h3 class="auth-title" id="authTitle">Login</h3>
+
+        <form id="authForm">
+          <div class="input-group">
+            <label>Email</label>
+            <input type="email" id="authEmail" required />
+          </div>
+
+          <div class="input-group">
+            <label>Password</label>
+            <input type="password" id="authPassword" required />
+          </div>
+
+          <button type="submit" id="authButton">Entrar</button>
+        </form>
+
+        <p class="auth-toggle" id="authToggle">¿No estás registrado?</p>
+
+        <div class="welcome-message hidden" id="welcomeMessage"></div>
+        <button class="logout-btn hidden" id="logoutBtn">Cerrar sesión</button>
+      </div>
+    </section>
+
+    <section class="map-container">
       <div class="map-wrapper">
         <p class="map-title">Mapa Favoritos</p>
         <div id="map1"></div>
@@ -29,8 +54,9 @@
       <div class="map-wrapper">
         <p class="map-title">Mapa Filtrado</p>
         <div id="map2"></div>
-
         <div class="filters-container">
+                  <div id="errorMsg" style="color:red; margin-top:10px;"></div>
+
           <label>
             Magnitud mínima:
             <input
@@ -39,7 +65,7 @@
               step="1"
               min="1"
               max="7"
-              value="1"
+              value="7"
               required
             />
           </label>
@@ -63,8 +89,10 @@
           <button id="filtrarBtn">Filtrar terremotos</button>
         </div>
       </div>
-    </div>
-
+    </section>
+    <script src="https://www.gstatic.com/firebasejs/8.7.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.7.1/firebase-firestore.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.7.1/firebase-auth.js"></script>
     <script src="./script.js"></script>
   </body>
 </html>

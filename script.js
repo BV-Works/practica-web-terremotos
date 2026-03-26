@@ -33,6 +33,8 @@ const authPassword = document.getElementById("authPassword");
 const welcomeMessage = document.getElementById("welcomeMessage");
 const logoutBtn = document.getElementById("logoutBtn");
 const mapButtons = document.getElementById("mapButtons");
+const showFavoritesButton = document.getElementById("showFavorites");
+const showAllButton = document.getElementById("showAll");
 
 let map1 = L.map("map1", {
   maxBounds: [
@@ -74,7 +76,6 @@ let Esri_NatGeoWorldMap2 = L.tileLayer(
 
 let terremotosGlobal = [];
 let terremotosFiltrados = [];
-let favoritos = [];
 
 // EVENTOS
 
@@ -109,6 +110,11 @@ authForm.addEventListener("submit", async (e) => {
     } else {
       pintarMapaFavs(true);
       userLogged = await firebase.auth().createUserWithEmailAndPassword(email, password);
+      let newUser = userLogged.user;
+      createUser({
+        id: newUser.uid,
+        email: newUser.email,
+      });
     }
 
     authTitle.classList.add("hidden")
@@ -143,6 +149,18 @@ logoutBtn.addEventListener("click", async () => {
     alert("Error cerrando sesión: " + error.message);
   }
 });
+
+
+showFavoritesButton.addEventListener("click", () => {
+  pintarMapaUsuario();
+});
+
+
+showAllButton.addEventListener("click", () => {
+  pintarMapaFavs(true);
+});
+
+
 
 document.getElementById("filtrarBtn").addEventListener("click", (e) => {
   e.preventDefault();
@@ -183,6 +201,15 @@ function changeForm() {
     authToggle.textContent = "¿Ya tienes cuenta?";
   }
 }
+
+const createUser = (user) => {
+  db.collection("users")
+    .doc(user.id) // Usar el UID del usuario como ID del documento en Firestore
+    .set({
+      email: user.email,
+      favorites: [], // Crear array de favoritos vacío
+    }).catch((error) => console.error("Error creando usuario: ", error));
+};
 
 async function obtenerTerremotos() {
   const url =
@@ -257,6 +284,27 @@ function pintarMapaFavs(isLoggedIn = false) {
   terremotosGlobal.forEach((terremoto) => {
     crearMarker(map1, terremoto, true, isLoggedIn);
   });
+}
+
+function pintarMapaUsuario() {
+  limpiarMapa(map1);
+  const user = firebase.auth().currentUser;
+  const userRef = db.collection("users").doc(user.uid);
+  userRef
+    .get()
+    .then((doc) => {
+      if (doc.exists) {
+        const favorites = doc.data().favorites || [];
+        favorites.forEach((terremoto) => {
+          crearMarker(map1, terremoto, true, true);
+        });
+      } else {
+        console.log("No se encontró el usuario.");
+      }
+    })
+    .catch((error) => {
+      console.error("Error obteniendo favoritos: ", error);
+    });
 }
 
 function pintarMapaFiltroInit() {
@@ -349,23 +397,12 @@ function crearMarker(map, terremoto, isFav = false, isLoggedIn = false) {
       const favButton = e.popup._contentNode.querySelector(".fav-btn");
       if (favButton) {
         favButton.addEventListener("click", () => {
-          favoritos.push(terremoto);
-          alert("favorito guardado:" + terremoto.nombre);
+          // alert("favorito guardado:" + terremoto.nombre);
+          addFavorite(terremoto);
         });
       }
     });
   }
-}
-
-function getColor(mag) {
-  if (mag < 1) return "#9e9e9e";
-  if (mag < 2) return "#4caf50";
-  if (mag < 3) return "#1b5e20";
-  if (mag < 4) return "#ffeb3b";
-  if (mag < 5) return "#ffb74d";
-  if (mag < 6) return "#ef6c00";
-  if (mag < 7) return "#d32f2f";
-  return "#e91e63";
 }
 
 function crearPopup(terremoto, color, isFav = false, isLoggedIn = false) {
@@ -385,6 +422,41 @@ function crearPopup(terremoto, color, isFav = false, isLoggedIn = false) {
     </div>
   `;
 }
+
+function getColor(mag) {
+  if (mag < 1) return "#9e9e9e";
+  if (mag < 2) return "#4caf50";
+  if (mag < 3) return "#1b5e20";
+  if (mag < 4) return "#ffeb3b";
+  if (mag < 5) return "#ffb74d";
+  if (mag < 6) return "#ef6c00";
+  if (mag < 7) return "#d32f2f";
+  return "#e91e63";
+}
+
+function addFavorite(terremoto) {
+  const user = firebase.auth().currentUser;
+
+  const userRef = db.collection("users").doc(user.uid);
+
+  userRef
+    .get()
+    .then((doc) => {
+      if (doc.exists) {
+        const favorites = doc.data().favorites;
+        const updatedFavorites = [...favorites, terremoto ]; // Añadir terremoto al array manualmente
+
+        userRef.update({ favorites: updatedFavorites }).then(() => {
+          alert("Terremoto añadida a favoritos.");
+        });
+      } else {
+        console.log("No se encontró el usuario.");
+      }
+    })
+    .catch((error) => {
+      console.error("Error añadiendo a favoritos: ", error);
+    });
+};
 
 (async () => {
   terremotosGlobal = await obtenerTerremotos();

@@ -40,8 +40,12 @@ button:hover {
 .input-group {
   display: flex;
   flex-direction: column;
-  margin-bottom: 10px;
 }
+
+.input-group input{
+  height: 32px;
+}
+
 
 .auth-box button {
   width: 100%;

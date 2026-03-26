@@ -1,4 +1,4 @@
-🌍 Web de Terremotos
+# 🌍  Web de Terremotos:
 
 Aplicación web interactiva que muestra terremotos en tiempo real utilizando mapas dinámicos con Leaflet y datos de la API de USGS.
 
@@ -6,20 +6,23 @@ Permite filtrar terremotos, gestionar favoritos y autenticarse mediante Firebase
 
 👉 https://bv-works.github.io/practica-web-terremotos/
 
-📌 Idea del proyecto
+## 📌 Idea del proyecto
 
 El objetivo de esta aplicación es:
 
 Visualizar terremotos en un mapa interactivo 🌍
+
 Filtrar eventos por magnitud y fecha
-Permitir a los usuarios:
-Registrarse / iniciar sesión 🔐
+
+Permitir a los usuarios: Registrarse / iniciar sesión 🔐
+
 Guardar terremotos como favoritos ⭐
+
 Consultar sus propios favoritos
 
 Todo ello sin frameworks, usando únicamente JavaScript puro y buenas prácticas.
 
-🚀 Tecnologías usadas:
+## 🚀 Tecnologías usadas:
 
 Frontend:
 HTML5 (estructura semántica)
@@ -41,7 +44,7 @@ Control de versiones
 Git:
 GitHub (gestión de ramas y despliegue con Pages)
 
-🗺️ Funcionalidades principales:
+## 🗺️ Funcionalidades principales:
 
 1. Mapa global de terremotos.
 Visualización de terremotos en tiempo real
@@ -76,17 +79,20 @@ Gestión de sesión
 📦 Firestore
 
 Estructura de datos:
-
+```
 users (collection)
   └── userId (document)
         ├── email: string
         └── favorites: array
-
+```
 Seguridad
 Cada usuario solo puede acceder a sus datos:
 allow read, write: if request.auth != null && request.auth.uid == userId;
 
-🏗️ Arquitectura de la aplicación:
+## 🏗️ Arquitectura de la aplicación:
+
+
+```text
         🌐 CLIENTE (WEB)
    -------------------------
    HTML / CSS / JavaScript
@@ -97,6 +103,7 @@ allow read, write: if request.auth != null && request.auth.uid == userId;
           ↓       ↓
    🌍 API USGS   🔥 FIREBASE
  (datos terremotos)   (Auth + Firestore)
+```
 
 Flujo:
 Cliente solicita datos → API USGS
@@ -107,12 +114,13 @@ Auth → login/register
 Firestore → guardar favoritos
 
 📁 Organización del proyecto (GitHub):
+```
 /
 ├── index.html
 ├── style.css
 ├── script.js
 ├── README.md
-
+```
 
 📱 Diseño:
 
@@ -120,7 +128,7 @@ Responsive (mobile-first)
 Flexbox
 Adaptación a diferentes tamaños de pantalla
 
-⏳ Tareas pendientes / mejoras:
+## ⏳ Tareas pendientes / mejoras:
 | Tarea                               | Estado |
 | ----------------------------------- | ------ |
 | Evitar duplicados en favoritos      | ✅ 100% |
@@ -134,11 +142,13 @@ Adaptación a diferentes tamaños de pantalla
 
 
 
-📸 Capturas de Pantalla
+## 📸 Capturas de Pantalla
 
 ![Mapa de terremotos](./assets/screenshot-demo.png)
 
-👤 Autor
+## 👤 Autor
+
+
 Jaime Rubio Salmerón: https://github.com/BV-Works
 
 Email: music@bajovigilancia.com

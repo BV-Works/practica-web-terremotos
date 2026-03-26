@@ -436,16 +436,19 @@ function getColor(mag) {
 
 function addFavorite(terremoto) {
   const user = firebase.auth().currentUser;
-
   const userRef = db.collection("users").doc(user.uid);
 
   userRef
     .get()
     .then((doc) => {
       if (doc.exists) {
-        const favorites = doc.data().favorites;
-        const updatedFavorites = [...favorites, terremoto ]; // Añadir terremoto al array manualmente
-
+        const favorites = doc.data().favorites || [];
+        const exists = favorites.some(fav => fav.id === terremoto.id);
+        if (exists) {
+          alert("Este terremoto ya está en favoritos");
+          return;
+        }
+        const updatedFavorites = [...favorites, terremoto ];
         userRef.update({ favorites: updatedFavorites }).then(() => {
           alert("Terremoto añadida a favoritos.");
         });
